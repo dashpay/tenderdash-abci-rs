@@ -29,67 +29,11 @@ impl From<Rfc3339> for Timestamp {
     }
 }
 
-pub trait ToMilis {
-    /// Convert protobuf timestamp into miliseconds since epoch
-
-    /// Note there is a resolution difference, as timestamp uses nanoseconds
-    ///
-    /// # Arguments
-    ///
-    /// * millis - time since epoch, in miliseconds
-    ///
-    /// # Panics
-    ///  
-    /// Panics when timestamp doesn't fit `u64` type
-    fn to_milis(&self) -> u64;
-}
-
-impl ToMilis for Timestamp {
-    /// Convert protobuf timestamp into miliseconds since epoch
-    fn to_milis(&self) -> u64 {
-        chrono::DateTime::from_timestamp(self.seconds, self.nanos as u32)
-            .unwrap()
-            .to_utc()
-            .timestamp_millis()
-            .try_into()
-            .expect("timestamp value out of u64 range")
-    }
-}
-
-pub trait FromMilis {
-    /// Create protobuf timestamp from miliseconds since epoch
-    ///
-    /// Note there is a resolution difference, as timestamp uses nanoseconds
-    ///
-    /// # Arguments
-    ///
-    /// * millis - time since epoch, in miliseconds; must fit `i64` type
-    fn from_milis(millis: u64) -> Self;
-}
-
-impl FromMilis for Timestamp {
-    /// Create protobuf timestamp from miliseconds since epoch
-    ///
-    /// Note there is a resolution difference, as timestamp uses nanoseconds
-    ///
-    /// # Panics
-    ///  
-    /// Panics when `millis` don't fit `i64` type
-    fn from_milis(millis: u64) -> Self {
-        let dt = chrono::DateTime::from_timestamp_millis(
-            millis
-                .try_into()
-                .expect("milliseconds timestamp out of i64 range"),
-        )
-        .expect("cannot parse timestamp")
-        .to_utc();
-
-        Self {
-            nanos: dt.timestamp_subsec_nanos() as i32,
-            seconds: dt.timestamp(),
-        }
-    }
-}
+// Code moved to crate::time, but kept here for compatibility
+#[deprecated = "use crate::prelude::FromMillis instead"]
+pub use crate::time::FromMillis as FromMilis;
+#[deprecated = "use crate::prelude::ToMillis instead"]
+pub use crate::time::ToMillis as ToMilis;
 
 /// Deserialize string into Timestamp
 pub fn deserialize<'de, D>(deserializer: D) -> Result<Timestamp, D::Error>

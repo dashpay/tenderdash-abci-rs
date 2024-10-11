@@ -12,6 +12,11 @@ use crate::prelude::*;
 
 define_error! {
     Error {
+        TimeConversion
+            { reason: String }
+            | e | {
+            format!("error converting time: {}", e.reason)
+        },
         TryFromProtobuf
             { reason: String }
             | e | {

@@ -44,13 +44,12 @@ pub use tenderdash_nostd::*;
 pub mod tenderdash_grpc;
 #[cfg(feature = "grpc")]
 pub use tenderdash_grpc::*;
-
+#[cfg(feature = "serde")]
 pub mod serializers;
+mod time;
 
 pub use meta::ABCI_VERSION;
-use prelude::*;
-#[cfg(feature = "grpc")]
-pub use tonic;
+pub use prelude::*;
 
 /// Allows for easy Google Protocol Buffers encoding and decoding of domain
 /// types with validation.

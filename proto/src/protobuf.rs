@@ -21,10 +21,14 @@ use std::fmt;
 /// The range is from 0001-01-01T00:00:00Z to 9999-12-31T23:59:59.999999999Z. By
 /// restricting to that range, we ensure that we can convert to and from [RFC
 /// 3339](https://www.ietf.org/rfc/rfc3339.txt) date strings.
-#[derive(Clone, Copy, PartialEq, ::prost::Message, ::serde::Deserialize, ::serde::Serialize)]
-#[serde(
-    from = "crate::serializers::timestamp::Rfc3339",
-    into = "crate::serializers::timestamp::Rfc3339"
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    serde(
+        from = "crate::serializers::timestamp::Rfc3339",
+        into = "crate::serializers::timestamp::Rfc3339"
+    )
 )]
 pub struct Timestamp {
     /// Represents seconds of UTC time since Unix epoch
@@ -62,7 +66,7 @@ pub struct Duration {
     #[prost(int32, tag = "2")]
     pub nanos: i32,
 }
-
+#[cfg(feature = "serde")]
 impl serde::Serialize for Duration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -72,9 +76,9 @@ impl serde::Serialize for Duration {
         serializer.serialize_i64(total_nanos)
     }
 }
-
+#[cfg(feature = "serde")]
 struct DurationVisitor;
-
+#[cfg(feature = "serde")]
 impl<'de> serde::de::Visitor<'de> for DurationVisitor {
     type Value = Duration;
 
@@ -99,7 +103,7 @@ impl<'de> serde::de::Visitor<'de> for DurationVisitor {
         self.visit_i128(value)
     }
 }
-
+#[cfg(feature = "serde")]
 impl<'de> serde::Deserialize<'de> for Duration {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where

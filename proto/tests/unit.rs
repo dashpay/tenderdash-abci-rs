@@ -3,7 +3,7 @@ use core::convert::TryFrom;
 
 use tenderdash_proto::{
     abci::ResponseException,
-    types::{BlockId as RawBlockId, ConsensusParams, PartSetHeader as RawPartSetHeader},
+    types::{BlockId as RawBlockId, PartSetHeader as RawPartSetHeader},
     Protobuf,
 };
 
@@ -135,7 +135,10 @@ pub fn test_response_exception_from() {
 }
 
 #[test]
+#[cfg(feature = "serde")]
 pub fn test_consensus_params_serde() {
+    use tenderdash_proto::types::ConsensusParams;
+
     let json = r#"
     {
         "block": {

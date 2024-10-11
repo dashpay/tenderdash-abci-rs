@@ -43,40 +43,46 @@ pub(crate) const DEFAULT_TENDERDASH_COMMITISH: &str = "v0.10-dev";
 
 /// Predefined custom attributes for message annotations
 const PRIMITIVE_ENUM: &str = r#"#[derive(::num_derive::FromPrimitive, ::num_derive::ToPrimitive)]"#;
-const SERIALIZED: &str = r#"#[derive(::serde::Deserialize, ::serde::Serialize)]"#;
-const TYPE_TAG: &str = r#"#[serde(tag = "type", content = "value")]"#;
+pub(crate) const SERIALIZED: &str =
+    r#"#[cfg_attr(feature = "serde", derive(::serde::Deserialize, ::serde::Serialize))]"#;
+const TYPE_TAG: &str = r#"#[cfg_attr(feature = "serde", serde(tag = "type", content = "value"))]"#;
 /// Predefined custom attributes for field annotations
-const QUOTED: &str = r#"#[serde(with = "crate::serializers::from_str")]"#;
-const QUOTED_WITH_DEFAULT: &str = r#"#[serde(with = "crate::serializers::from_str", default)]"#;
-const DEFAULT: &str = r#"#[serde(default)]"#;
-const HEXSTRING: &str = r#"#[serde(with = "crate::serializers::bytes::hexstring")]"#;
-const BASE64STRING: &str = r#"#[serde(with = "crate::serializers::bytes::base64string")]"#;
-const VEC_BASE64STRING: &str = r#"#[serde(with = "crate::serializers::bytes::vec_base64string")]"#;
-const OPTIONAL: &str = r#"#[serde(with = "crate::serializers::optional")]"#;
+const QUOTED: &str =
+    r#"#[cfg_attr(feature = "serde", serde(with = "crate::serializers::from_str"))]"#;
+const QUOTED_WITH_DEFAULT: &str =
+    r#"#[cfg_attr(feature = "serde", serde(with = "crate::serializers::from_str", default))]"#;
+const DEFAULT: &str = r#"#[cfg_attr(feature = "serde", serde(default))]"#;
+const HEXSTRING: &str =
+    r#"#[cfg_attr(feature = "serde", serde(with = "crate::serializers::bytes::hexstring"))]"#;
+const BASE64STRING: &str =
+    r#"#[cfg_attr(feature = "serde", serde(with = "crate::serializers::bytes::base64string"))]"#;
+const VEC_BASE64STRING: &str = r#"#[cfg_attr(feature = "serde", serde(with = "crate::serializers::bytes::vec_base64string"))]"#;
+const OPTIONAL: &str =
+    r#"#[cfg_attr(feature = "serde", serde(with = "crate::serializers::optional"))]"#;
 // const BYTES_SKIP_IF_EMPTY: &str = r#"#[serde(skip_serializing_if =
 // "bytes::Bytes::is_empty")]"#;
 const DERIVE_FROM_FORWARD: &str = r#"#[from(forward)]"#;
-const NULLABLEVECARRAY: &str = r#"#[serde(with = "crate::serializers::txs")]"#;
-const NULLABLE: &str = r#"#[serde(with = "crate::serializers::nullable")]"#;
-const ALIAS_POWER_QUOTED: &str =
-    r#"#[serde(alias = "power", with = "crate::serializers::from_str")]"#;
+const NULLABLEVECARRAY: &str =
+    r#"#[cfg_attr(feature = "serde", serde(with = "crate::serializers::txs"))]"#;
+const NULLABLE: &str =
+    r#"#[cfg_attr(feature = "serde", serde(with = "crate::serializers::nullable"))]"#;
+const ALIAS_POWER_QUOTED: &str = r#"#[cfg_attr(feature = "serde", serde(alias = "power", with = "crate::serializers::from_str"))]"#;
 const PART_SET_HEADER_TOTAL: &str =
-    r#"#[serde(with = "crate::serializers::part_set_header_total")]"#;
-const RENAME_EDPUBKEY: &str = r#"#[serde(rename = "tenderdash/PubKeyEd25519", with = "crate::serializers::bytes::base64string")]"#;
-const RENAME_SECPPUBKEY: &str = r#"#[serde(rename = "tenderdash/PubKeySecp256k1", with = "crate::serializers::bytes::base64string")]"#;
-const RENAME_SRPUBKEY: &str = r#"#[serde(rename = "tenderdash/PubKeySr25519", with = "crate::serializers::bytes::base64string")]"#;
-const RENAME_DUPLICATEVOTE: &str = r#"#[serde(rename = "tenderdash/DuplicateVoteEvidence")]"#;
+    r#"#[cfg_attr(feature = "serde", serde(with = "crate::serializers::part_set_header_total"))]"#;
+const RENAME_EDPUBKEY: &str = r#"#[cfg_attr(feature = "serde", serde(rename = "tenderdash/PubKeyEd25519", with = "crate::serializers::bytes::base64string"))]"#;
+const RENAME_SECPPUBKEY: &str = r#"#[cfg_attr(feature = "serde", serde(rename = "tenderdash/PubKeySecp256k1", with = "crate::serializers::bytes::base64string"))]"#;
+const RENAME_SRPUBKEY: &str = r#"#[cfg_attr(feature = "serde", serde(rename = "tenderdash/PubKeySr25519", with = "crate::serializers::bytes::base64string"))]"#;
+const RENAME_DUPLICATEVOTE: &str =
+    r#"#[cfg_attr(feature = "serde", serde(rename = "tenderdash/DuplicateVoteEvidence"))]"#;
 const RENAME_LIGHTCLIENTATTACK: &str =
-    r#"#[serde(rename = "tenderdash/LightClientAttackEvidence")]"#;
+    r#"#[cfg_attr(feature = "serde", serde(rename = "tenderdash/LightClientAttackEvidence"))]"#;
 // const EVIDENCE_VARIANT: &str = r#"#[serde(from =
 // "crate::serializers::evidence::EvidenceVariant",
 // into = "crate::serializers::evidence::EvidenceVariant")]"#;
-const ALIAS_VALIDATOR_POWER_QUOTED: &str =
-    r#"#[serde(alias = "ValidatorPower", with = "crate::serializers::from_str")]"#;
-const ALIAS_TOTAL_VOTING_POWER_QUOTED: &str =
-    r#"#[serde(alias = "TotalVotingPower", with = "crate::serializers::from_str")]"#;
-const ALIAS_TIMESTAMP: &str = r#"#[serde(alias = "Timestamp")]"#;
-const ALIAS_PARTS: &str = r#"#[serde(alias = "parts")]"#;
+const ALIAS_VALIDATOR_POWER_QUOTED: &str = r#"#[cfg_attr(feature = "serde", serde(alias = "ValidatorPower", with = "crate::serializers::from_str"))]"#;
+const ALIAS_TOTAL_VOTING_POWER_QUOTED: &str = r#"#[cfg_attr(feature = "serde", serde(alias = "TotalVotingPower", with = "crate::serializers::from_str"))]"#;
+const ALIAS_TIMESTAMP: &str = r#"#[cfg_attr(feature = "serde", serde(alias = "Timestamp"))]"#;
+const ALIAS_PARTS: &str = r#"#[cfg_attr(feature = "serde", serde(alias = "parts"))]"#;
 const DERIVE_FROM: &str = r#"#[derive(derive_more::From)]"#;
 const DERIVE_FROM_STR: &str = r#"#[derive(derive_more::FromStr)]"#;
 /// Custom type attributes applied on top of protobuf structs
@@ -85,54 +91,13 @@ const DERIVE_FROM_STR: &str = r#"#[derive(derive_more::FromStr)]"#;
 /// The first item is a path as defined in the prost_build::Config::btree_map
 /// here: <https://docs.rs/prost-build/0.6.1/prost_build/struct.Config.html#method.btree_map>
 pub static CUSTOM_TYPE_ATTRIBUTES: &[(&str, &str)] = &[
-    (".tendermint.abci.Event", SERIALIZED),
-    (".tendermint.abci.EventAttribute", SERIALIZED),
-    (".tendermint.libs.bits.BitArray", SERIALIZED),
-    (".tendermint.types.BlockIDFlag", PRIMITIVE_ENUM),
-    (".tendermint.types.Block", SERIALIZED),
-    (".tendermint.types.Data", SERIALIZED),
-    (".tendermint.types.EvidenceList", SERIALIZED),
-    (".tendermint.types.Evidence", SERIALIZED),
-    (".tendermint.types.EvidenceVariant", SERIALIZED),
-    (".tendermint.types.DuplicateVoteEvidence", SERIALIZED),
-    (".tendermint.types.Vote", SERIALIZED),
-    (".tendermint.types.BlockID", SERIALIZED),
-    (".tendermint.types.PartSetHeader", SERIALIZED),
-    (".tendermint.types.LightClientAttackEvidence", SERIALIZED),
-    (".tendermint.types.LightBlock", SERIALIZED),
-    (".tendermint.types.SignedHeader", SERIALIZED),
-    (".tendermint.types.Header", SERIALIZED),
-    (".tendermint.version.Consensus", SERIALIZED),
-    (".tendermint.types.Commit", SERIALIZED),
-    (".tendermint.types.CommitSig", SERIALIZED),
-    (".tendermint.types.CoreChainLock", SERIALIZED),
-    (".tendermint.types.ValidatorSet", SERIALIZED),
-    (".tendermint.crypto.PublicKey", SERIALIZED),
     (".tendermint.crypto.PublicKey.sum", TYPE_TAG),
+    (".tendermint.types.BlockIDFlag", PRIMITIVE_ENUM),
     (".tendermint.types.Evidence.sum", TYPE_TAG),
-    (".tendermint.abci.ResponseInfo", SERIALIZED),
+    (".tendermint.abci.Request.value", DERIVE_FROM),
+    (".tendermint.abci.Response.value", DERIVE_FROM),
     (".tendermint.abci.ResponseException", DERIVE_FROM),
     (".tendermint.abci.ResponseException", DERIVE_FROM_STR),
-    (".tendermint.types.CanonicalBlockID", SERIALIZED),
-    (".tendermint.types.CanonicalPartSetHeader", SERIALIZED),
-    (".tendermint.types.Validator", SERIALIZED),
-    (".tendermint.types.CanonicalVote", SERIALIZED),
-    (".tendermint.types.VoteExtension", SERIALIZED),
-    (".tendermint.types.BlockMeta", SERIALIZED),
-    // (".tendermint.types.Evidence", EVIDENCE_VARIANT),
-    (".tendermint.types.TxProof", SERIALIZED),
-    (".tendermint.crypto.Proof", SERIALIZED),
-    (".tendermint.abci.Response.value", DERIVE_FROM),
-    (".tendermint.abci.Request.value", DERIVE_FROM),
-    // Consensus params
-    (".tendermint.types.ConsensusParams", SERIALIZED),
-    (".tendermint.types.ABCIParams", SERIALIZED),
-    (".tendermint.types.BlockParams", SERIALIZED),
-    (".tendermint.types.EvidenceParams", SERIALIZED),
-    (".tendermint.types.ValidatorParams", SERIALIZED),
-    (".tendermint.types.VersionParams", SERIALIZED),
-    (".tendermint.types.SynchronyParams", SERIALIZED),
-    (".tendermint.types.TimeoutParams", SERIALIZED),
 ];
 
 /// Custom field attributes applied on top of protobuf fields in (a) struct(s)

@@ -95,10 +95,14 @@ pub fn proto_compile(mode: GenerationMode) {
 
     // Compile proto files with added annotations, exchange prost_types to our own
     pb.out_dir(&out_dir);
+    pb.type_attribute(".", constants::SERIALIZED);
     for type_attribute in CUSTOM_TYPE_ATTRIBUTES {
+        println!("[info] => Adding type attribute: {:?}", type_attribute);
         pb.type_attribute(type_attribute.0, type_attribute.1);
     }
+
     for field_attribute in CUSTOM_FIELD_ATTRIBUTES {
+        println!("[info] => Adding field attribute: {:?}", field_attribute);
         pb.field_attribute(field_attribute.0, field_attribute.1);
     }
     // The below in-place path redirection replaces references to the Duration
@@ -124,7 +128,7 @@ pub fn proto_compile(mode: GenerationMode) {
             #[cfg(feature = "grpc")]
             tonic_build::configure()
                 .generate_default_stubs(true)
-                .compile_with_config(pb, &protos, &proto_includes_paths)
+                .compile_protos_with_config(pb, &protos, &proto_includes_paths)
                 .unwrap();
             #[cfg(not(feature = "grpc"))]
             panic!("grpc feature is required to compile {}", mode.to_string());
