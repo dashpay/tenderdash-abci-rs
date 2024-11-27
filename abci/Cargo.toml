@@ -83,4 +83,5 @@ futures = { version = "0.3.30" }
 tokio = { version = "1.40", features = ["macros", "signal", "time", "io-std"] }
 hex = { version = "0.4.3" }
 lazy_static = { version = "1.4.0" }
+# Note: pollster is not safe outside of tests, we had issues with it in the past
 pollster = { version = "0.4.0" }
