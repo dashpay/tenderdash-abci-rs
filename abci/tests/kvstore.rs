@@ -63,7 +63,7 @@ fn test_kvstore() {
     fs::set_permissions(SOCKET, perms).expect("set perms");
 
     let socket_uri = bind_address.to_string();
-    let _td = common::docker::TenderdashDocker::new("tenderdash", None, &socket_uri);
+    let td = common::docker::TenderdashDocker::new("tenderdash", None, &socket_uri);
 
     let next_client = server.next_client();
     tracing::debug!(?next_client, "next client");
@@ -76,6 +76,8 @@ fn test_kvstore() {
     let kvstore_app = kvstore.into_inner().expect("kvstore lock is poisoned");
     assert_eq!(kvstore_app.persisted_state, state_reference);
     assert_eq!(kvstore_app.last_block_height, 1);
+
+    drop(td);
 }
 
 /// An example storage.
