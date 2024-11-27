@@ -17,7 +17,6 @@ The repository contains the following crates:
 * [tenderdash-abci](./abci/) - main crate, including ABCI++ socket and tcp server implementation, `Application` trait and re-exporting `tenderdash-proto` crate
 * [tenderdash-proto](./proto/) - ABCI++ messages and data types definitions, and gRPC client/server implementation, generated based on Tenderdash protobuf specifications
 * [tenderdash-proto-compiler](./proto-compiler/) - an internal tool that fetches tenderdash repository and converts protobuf files to Rust
-*
 
 ## Version Compatibility
 
@@ -31,6 +30,8 @@ This library also includes built-in support for ABCI protocol version verificati
 ## Quick start
 
 1. Install dependencies. You can find a current list of dependencies in the [Dockerfile](Dockerfile-debian).
+   * Ensure to install `protoc` from <https://github.com/protocolbuffers/protobuf/releases> and place it in your `$PATH`, as we
+   **don't support protoc shipped with your distribution** (like Ubuntu).
 2. Add tenderdash-abci crate to your project:
 
     ```bash
