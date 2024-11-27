@@ -65,8 +65,10 @@ fn test_kvstore() {
     let socket_uri = bind_address.to_string();
     let _td = common::docker::TenderdashDocker::new("tenderdash", None, &socket_uri);
 
+    let next_client = server.next_client();
+    tracing::debug!(?next_client, "next client");
     assert!(matches!(
-        server.next_client(),
+        next_client,
         Err(tenderdash_abci::Error::Cancelled())
     ));
     drop(server);
