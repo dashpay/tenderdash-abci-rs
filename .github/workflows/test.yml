@@ -31,12 +31,12 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/deps
         with:
-          toolchain: nightly
+          toolchain: stable
 
       - name: Test tenderdash-proto
         shell: bash
         timeout-minutes: 6
-        run: cargo test --all-features -p tenderdash-proto -- -Zunstable-options --ensure-time
+        run: cargo test --all-features -p tenderdash-proto
 
       - name: Test tenderdash-abci
         shell: bash
@@ -45,7 +45,7 @@ jobs:
         env:
           RUSTFLAGS: "-Cinstrument-coverage"
           LLVM_PROFILE_FILE: "%p-%m.profraw"
-        run: cargo test --all-features -p tenderdash-abci -- -Zunstable-options --ensure-time
+        run: cargo test --all-features -p tenderdash-abci
 
       - name: Emit docker logs on error
         if: failure()
