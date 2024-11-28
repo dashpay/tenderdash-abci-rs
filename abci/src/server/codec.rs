@@ -97,6 +97,18 @@ impl<'a> Codec {
 
         Self::process_worker_queues(codec, request_tx, response_rx, cancel).await;
     }
+
+    /// Worker that moves messages between codec and requests and responses
+    /// queues.
+    ///
+    /// Reads messages from ABCI Client from `codec`, sends them to Tenderdash
+    /// via `request_tx`, receives Tenderdash responses from `response_rx`
+    /// and forwards to
+    ///
+    /// ## Error handling
+    ///
+    /// On error, it cancels the `cancel` [CancellationToken] and exits.
+    /// It causes `response_rx` to be closed.
     async fn process_worker_queues<L: AsyncRead + AsyncWrite + Unpin>(
         mut codec: Framed<L, Coder>,
         request_tx: Sender<proto::abci::Request>,
@@ -149,9 +161,10 @@ impl<'a> Codec {
     }
 
     pub fn send(&self, value: Response) -> Result<(), Error> {
-        self.response_tx
-            .blocking_send(value)
-            .map_err(|e| Error::Async(e.to_string()))
+        self.response_tx.blocking_send(value).map_err(|_| {
+            // channel closed, `process_worker_queues` either errored or cancelled
+            Error::Cancelled()
+        })
     }
 }
 
