@@ -33,17 +33,30 @@ use bytes::{Buf, BufMut};
 pub use error::Error;
 pub use prost;
 use prost::{encoding::encoded_len_varint, Message};
+
 #[rustfmt::skip]
 pub mod tenderdash_nostd;
+
+
+// Depending on feature, add correct module
+
+#[cfg(feature = "server")]
+#[rustfmt::skip]
+pub mod tenderdash_grpc;
+#[cfg(feature = "client")]
+#[rustfmt::skip]
+pub mod tenderdash_grpc_client;
+
+// Now, re-export correct module
+
+#[cfg(feature = "server")]
+pub use tenderdash_grpc::*;
+#[cfg(all(not(feature = "server"), feature = "client"))]
+pub use tenderdash_grpc_client::*;
 #[cfg(not(feature = "grpc"))]
 // Re-export the nostd module only if the std one is not available
 pub use tenderdash_nostd::*;
 
-#[cfg(feature = "grpc")]
-#[rustfmt::skip]
-pub mod tenderdash_grpc;
-#[cfg(feature = "grpc")]
-pub use tenderdash_grpc::*;
 #[cfg(feature = "serde")]
 pub mod serializers;
 mod time;

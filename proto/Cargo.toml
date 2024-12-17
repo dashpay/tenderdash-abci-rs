@@ -34,17 +34,16 @@ all-features = true
 #
 # Sometimes cleaning the build cache with `cargo clean` might be necessary to solve
 # issues related to outdated generated files.
-default = ["grpc"]
+default = ["server"]
 
-# Enable standard library support; DEPRECATED - use `grpc` instead
-std = ["grpc"]
-# Build gRPC server using tonic
-grpc = [
-    "prost/std",
-    "tenderdash-proto-compiler/server",
-    "tenderdash-proto-compiler/client",
-    "dep:tonic",
-]
+# Enable standard library support; DEPRECATED - use `client` and/or `server` instead
+std = ["client"]
+# Enable gRPC support using tonic; internal, consider using `server` or `client` instead
+grpc = ["client", "dep:tonic", "tonic/codegen", "tonic/prost"]
+# Build gRPC server using tonic. Includes `client` feature.
+server = ["client"]
+# Build minimal gRPC client using tonic, without transport
+client = ["tenderdash-proto-compiler/grpc", "prost/std", "grpc"]
 
 serde = ["dep:serde", "bytes/serde"]
 
@@ -53,7 +52,7 @@ bytes = { version = "1.7", default-features = false }
 prost = { version = "0.13", default-features = false, features = [
     "prost-derive",
 ] }
-tonic = { version = "0.12.3", optional = true }
+tonic = { version = "0.12.3", optional = true, default-features = false }
 serde = { version = "1.0.208", default-features = false, features = [
     "derive",
 ], optional = true }

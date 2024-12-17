@@ -11,15 +11,20 @@ pub const TENDERDASH_REPO: &str = "https://github.com/dashpay/tenderdash";
 pub enum GenerationMode {
     /// Generate the files using `tonic` and put them into `tenderdash_grpc`
     /// module.
-    Grpc,
+    GrpcServer,
+    /// Generate minimal gRPC client using tonic, without transport
+    /// implementation. Put them into `tenderdash_grpc_client` module.
+    GrpcClient,
     /// Generate the files without `std` and put them into `tenderdash_nostd`
     /// module.
     NoStd,
 }
+
 impl GenerationMode {
     pub fn module_name(&self) -> String {
         match self {
-            GenerationMode::Grpc => "tenderdash_grpc".to_string(),
+            GenerationMode::GrpcServer => "tenderdash_grpc".to_string(),
+            GenerationMode::GrpcClient => "tenderdash_grpc_client".to_string(),
             GenerationMode::NoStd => "tenderdash_nostd".to_string(),
         }
     }
@@ -28,7 +33,8 @@ impl GenerationMode {
 impl ToString for GenerationMode {
     fn to_string(&self) -> String {
         match self {
-            GenerationMode::Grpc => "tonic".to_string(),
+            GenerationMode::GrpcServer => "grpc-client-server".to_string(),
+            GenerationMode::GrpcClient => "grpc-client".to_string(),
             GenerationMode::NoStd => "nostd".to_string(),
         }
     }

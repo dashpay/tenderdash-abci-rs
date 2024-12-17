@@ -1,5 +1,7 @@
 //! Time conversion traits and functions
 
+#[cfg(not(feature = "std"))]
+use crate::format;
 use crate::{google::protobuf::Timestamp, Error};
 pub trait ToMillis {
     /// Convert protobuf timestamp into milliseconds since epoch
