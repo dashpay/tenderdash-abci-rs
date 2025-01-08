@@ -1,5 +1,7 @@
 //! Tenderdash protobuf implementation
 
+use std::fmt::Display;
+
 // Requirements
 pub const DEP_PROTOC_VERSION: f32 = 25.0;
 
@@ -30,13 +32,14 @@ impl GenerationMode {
     }
 }
 
-impl ToString for GenerationMode {
-    fn to_string(&self) -> String {
-        match self {
+impl Display for GenerationMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mode = match self {
             GenerationMode::GrpcServer => "grpc-client-server".to_string(),
             GenerationMode::GrpcClient => "grpc-client".to_string(),
             GenerationMode::NoStd => "nostd".to_string(),
-        }
+        };
+        write!(f, "{}", mode)
     }
 }
 

@@ -134,7 +134,7 @@ pub fn proto_compile(mode: GenerationMode) {
                 .compile_protos_with_config(pb, &protos, &proto_includes_paths)
                 .unwrap();
             #[cfg(not(feature = "grpc"))]
-            panic!("grpc feature is required to compile {}", mode.to_string());
+            panic!("grpc feature is required to compile {}", mode);
         },
         GenerationMode::GrpcClient => {
             #[cfg(feature = "grpc")]
@@ -146,7 +146,7 @@ pub fn proto_compile(mode: GenerationMode) {
                 .compile_protos_with_config(pb, &protos, &proto_includes_paths)
                 .unwrap();
             #[cfg(not(feature = "grpc"))]
-            panic!("grpc feature is required to compile {}", mode.to_string());
+            panic!("grpc feature is required to compile {}", mode);
         },
         GenerationMode::NoStd => {
             pb.compile_protos(&protos, &proto_includes_paths).unwrap();

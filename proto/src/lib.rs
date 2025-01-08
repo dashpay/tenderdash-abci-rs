@@ -1,9 +1,9 @@
 //! tenderdash-proto library gives the developer access to the Tenderdash
 //! proto-defined structs.
-
 #![cfg_attr(not(feature = "grpc"), no_std)]
 #![deny(warnings, trivial_casts, trivial_numeric_casts, unused_import_braces)]
 #![allow(clippy::large_enum_variant)]
+#![allow(clippy::doc_lazy_continuation)]
 #![forbid(unsafe_code)]
 
 extern crate alloc;
@@ -34,28 +34,27 @@ pub use error::Error;
 pub use prost;
 use prost::{encoding::encoded_len_varint, Message};
 
+#[cfg(not(any(feature = "server", feature = "client")))]
 #[rustfmt::skip]
+#[allow(clippy::empty_docs)]
 pub mod tenderdash_nostd;
-
-
-// Depending on feature, add correct module
 
 #[cfg(feature = "server")]
 #[rustfmt::skip]
+#[allow(clippy::empty_docs)]
 pub mod tenderdash_grpc;
 #[cfg(feature = "client")]
 #[rustfmt::skip]
+#[allow(clippy::empty_docs)]
 pub mod tenderdash_grpc_client;
 
 // Now, re-export correct module
 
 #[cfg(feature = "server")]
-#[rustfmt::skip]
 pub use tenderdash_grpc::*;
 #[cfg(all(not(feature = "server"), feature = "client"))]
 pub use tenderdash_grpc_client::*;
-#[cfg(not(feature = "grpc"))]
-// Re-export the nostd module only if the std one is not available
+#[cfg(all(not(feature = "server"), not(feature = "client")))]
 pub use tenderdash_nostd::*;
 
 #[cfg(feature = "serde")]
