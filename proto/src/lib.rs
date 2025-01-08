@@ -50,6 +50,7 @@ pub mod tenderdash_grpc_client;
 // Now, re-export correct module
 
 #[cfg(feature = "server")]
+#[rustfmt::skip]
 pub use tenderdash_grpc::*;
 #[cfg(all(not(feature = "server"), feature = "client"))]
 pub use tenderdash_grpc_client::*;

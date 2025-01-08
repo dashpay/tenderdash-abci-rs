@@ -41,7 +41,7 @@ std = ["client"]
 # Enable gRPC support using tonic; internal, consider using `server` or `client` instead
 grpc = ["client", "dep:tonic", "tonic/codegen", "tonic/prost"]
 # Build gRPC server using tonic. Includes `client` feature.
-server = ["client"]
+server = ["client", "tonic/transport"]
 # Build minimal gRPC client using tonic, without transport
 client = ["tenderdash-proto-compiler/grpc", "prost/std", "grpc"]
 
