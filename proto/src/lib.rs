@@ -1,6 +1,6 @@
 //! tenderdash-proto library gives the developer access to the Tenderdash
 //! proto-defined structs.
-#![cfg_attr(not(feature = "grpc"), no_std)]
+#![cfg_attr(not(feature = "std"), no_std)]
 #![deny(warnings, trivial_casts, trivial_numeric_casts, unused_import_braces)]
 #![allow(clippy::large_enum_variant)]
 #![allow(clippy::doc_lazy_continuation)]
@@ -21,12 +21,12 @@ pub mod google {
 
 mod error;
 
-#[cfg(not(feature = "grpc"))]
+#[cfg(not(feature = "std"))]
 use core::{
     convert::{TryFrom, TryInto},
     fmt::Display,
 };
-#[cfg(feature = "grpc")]
+#[cfg(feature = "std")]
 use std::fmt::Display;
 
 use bytes::{Buf, BufMut};

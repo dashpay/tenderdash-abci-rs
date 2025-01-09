@@ -36,14 +36,21 @@ all-features = true
 # issues related to outdated generated files.
 default = ["server"]
 
-# Enable standard library support; DEPRECATED - use `client` and/or `server` instead
+# Enable standard library support; required by `client` and `server`
 std = ["client"]
-# Enable gRPC support using tonic; internal, consider using `server` or `client` instead
-grpc = ["client", "dep:tonic", "tonic/codegen", "tonic/prost"]
+# Enable gRPC support using tonic; DEPRECATED, consider using `server` or `client` instead
+grpc = ["client"]
 # Build gRPC server using tonic. Includes `client` feature.
 server = ["client", "tonic/transport"]
 # Build minimal gRPC client using tonic, without transport
-client = ["tenderdash-proto-compiler/grpc", "prost/std", "grpc"]
+client = [
+    "tenderdash-proto-compiler/grpc",
+    "prost/std",
+    "dep:tonic",
+    "tonic/codegen",
+    "tonic/prost",
+    "std",
+]
 
 serde = ["dep:serde", "bytes/serde"]
 
