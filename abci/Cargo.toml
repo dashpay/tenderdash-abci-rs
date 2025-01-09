@@ -32,10 +32,11 @@ server = [
     "dep:tokio",
     "dep:tokio-util",
     "dep:futures",
+    "grpc",
 ]
 # std is deprecated, use "grpc" instead
 std = ["grpc"]
-grpc = ["tenderdash-proto/grpc"]
+grpc = ["tenderdash-proto/server"]
 crypto = ["dep:lhash"]
 tcp = ["server"]
 unix = ["server"]
