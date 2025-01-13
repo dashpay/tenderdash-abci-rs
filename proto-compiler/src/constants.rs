@@ -9,7 +9,6 @@ pub const DEP_PROTOC_VERSION: f32 = 25.0;
 pub const TENDERDASH_REPO: &str = "https://github.com/dashpay/tenderdash";
 
 /// How to generate the protobuf files.
-
 pub enum GenerationMode {
     /// Generate the files using `tonic` and put them into `tenderdash_grpc`
     /// module.
