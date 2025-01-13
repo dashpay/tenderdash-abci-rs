@@ -3,9 +3,9 @@
 // Prost does not seem to have a way yet to remove documentations defined in
 // protobuf files. These structs are defined in gogoproto v1.3.1 at https://github.com/gogo/protobuf/tree/v1.3.1/protobuf/google/protobuf
 
-#[cfg(not(feature = "grpc"))]
+#[cfg(not(feature = "std"))]
 use core::fmt;
-#[cfg(feature = "grpc")]
+#[cfg(feature = "std")]
 use std::fmt;
 
 /// A Timestamp represents a point in time independent of any time zone or local

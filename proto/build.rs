@@ -13,8 +13,16 @@ fn main() {
         env::set_var("TENDERDASH_COMMITISH", DEFAULT_VERSION);
     }
 
-    #[cfg(feature = "grpc")]
-    tenderdash_proto_compiler::proto_compile(GenerationMode::Grpc);
+    // build gRPC server and client
+    // note it should be safe to build both server and client; we will just not use
+    // them in the lib.rs
+
+    #[cfg(feature = "server")]
+    // build gRPC server (includes client)
+    tenderdash_proto_compiler::proto_compile(GenerationMode::GrpcServer);
+    #[cfg(feature = "client")]
+    // build gRPC client only
+    tenderdash_proto_compiler::proto_compile(GenerationMode::GrpcClient);
     // we always build nostd version
     tenderdash_proto_compiler::proto_compile(GenerationMode::NoStd);
 

@@ -11,7 +11,7 @@ pub use alloc::{
 };
 pub use core::prelude::v1::*;
 
-#[cfg(feature = "grpc")]
+#[cfg(feature = "std")]
 pub use tonic;
 
 pub use crate::time::{FromMillis, ToMillis};

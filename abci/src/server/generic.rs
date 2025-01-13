@@ -96,7 +96,7 @@ impl<App: RequestDispatcher> GenericServer<App, UnixListener> {
     }
 }
 
-impl<'a, App: RequestDispatcher + 'a, L: Listener> Server for GenericServer<App, L>
+impl<App: RequestDispatcher, L: Listener> Server for GenericServer<App, L>
 where
     L: Listener + Send + Sync + 'static,
     L::Addr: Send + Debug,

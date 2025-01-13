@@ -1,7 +1,7 @@
 //! Serialize/deserialize Timestamp type from and into string:
-#[cfg(not(feature = "grpc"))]
+#[cfg(not(feature = "std"))]
 use core::fmt::{self, Debug};
-#[cfg(feature = "grpc")]
+#[cfg(feature = "std")]
 use std::fmt::{self, Debug};
 
 use serde::{de::Error as _, ser::Error, Deserialize, Deserializer, Serialize, Serializer};

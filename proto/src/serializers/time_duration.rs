@@ -1,7 +1,7 @@
 //! Serialize/deserialize core::time::Duration type from and into string:
-#[cfg(not(feature = "grpc"))]
+#[cfg(not(feature = "std"))]
 use core::time::Duration;
-#[cfg(feature = "grpc")]
+#[cfg(feature = "std")]
 use std::time::Duration;
 
 use serde::{de::Error as _, Deserialize, Deserializer, Serialize, Serializer};

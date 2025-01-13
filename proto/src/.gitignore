@@ -1,5 +1,6 @@
 tenderdash_nostd/
 tenderdash_grpc/
+tenderdash_grpc_client/
 
 # prost/ and tenderdash.rs are deprecated and can be removed in the future
 prost/
