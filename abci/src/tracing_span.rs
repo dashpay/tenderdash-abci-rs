@@ -87,6 +87,7 @@ fn abci_method_name(request: &Value) -> String {
         Value::InitChain(_) => "InitChain",
         Value::ListSnapshots(_) => "ListSnapshots",
         Value::LoadSnapshotChunk(_) => "LoadSnapshotChunk",
+        Value::FinalizeSnapshot(_) => "FinalizeSnapshot",
         Value::OfferSnapshot(_) => "OfferSnapshot",
         Value::PrepareProposal(_) => "PrepareProposal",
         Value::ProcessProposal(_) => "ProcessProposal",

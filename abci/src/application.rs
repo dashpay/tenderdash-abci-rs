@@ -103,6 +103,13 @@ pub trait Application {
         Ok(Default::default())
     }
 
+    fn finalize_snapshot(
+        &self,
+        _request: abci::RequestFinalizeSnapshot,
+    ) -> Result<abci::ResponseFinalizeSnapshot, abci::ResponseException> {
+        Ok(Default::default())
+    }
+
     fn extend_vote(
         &self,
         _request: abci::RequestExtendVote,
@@ -169,6 +176,7 @@ impl<A: Application> RequestDispatcher for A {
             request::Value::ApplySnapshotChunk(req) => {
                 self.apply_snapshot_chunk(req).map(|v| v.into())
             },
+            request::Value::FinalizeSnapshot(req) => self.finalize_snapshot(req).map(|v| v.into()),
             request::Value::ListSnapshots(req) => self.list_snapshots(req).map(|v| v.into()),
             request::Value::PrepareProposal(req) => self.prepare_proposal(req).map(|v| v.into()),
             request::Value::ProcessProposal(req) => self.process_proposal(req).map(|v| v.into()),
