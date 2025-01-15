@@ -4,7 +4,7 @@ use tenderdash_proto_compiler::GenerationMode;
 
 fn main() {
     // default Tenderdash version to use if TENDERDASH_COMMITISH is not set
-    const DEFAULT_VERSION: &str = "f89ed874f295784f3c10759d0612b64ab8ae82cb";
+    const DEFAULT_VERSION: &str = "8f33ac1c773f760a08f14a4dd9986f60449ea916";
 
     // check if TENDERDASH_COMMITISH is already set; if not, set it to the current
     // version
