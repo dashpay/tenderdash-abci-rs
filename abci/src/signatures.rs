@@ -458,13 +458,13 @@ impl Hashable for ValidatorSet {
         let threshold_public_key_enum = self
             .threshold_public_key
             .as_ref()
+            .and_then(|key| key.sum.as_ref())
             .ok_or(Error::Canonical("missing threshold public key".to_string()))?;
 
-        let threshold_public_key = match &threshold_public_key_enum.sum {
-            Some(Bls12381(pk)) => pk,
-            Some(Ed25519(pk)) => pk,
-            Some(Secp256k1(pk)) => pk,
-            None => return Err(Error::Canonical("missing threshold public key".to_string())),
+        let threshold_public_key = match &threshold_public_key_enum {
+            Bls12381(pk) => pk,
+            Ed25519(pk) => pk,
+            Secp256k1(pk) => pk,
         };
 
         let result = merkle_hash(&[threshold_public_key, &self.quorum_hash]);
