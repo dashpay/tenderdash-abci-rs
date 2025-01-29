@@ -29,7 +29,6 @@ use tenderdash_proto::prost::{DecodeError, EncodeError};
 mod merkle;
 #[cfg(feature = "crypto")]
 pub mod signatures;
-
 #[cfg(feature = "tracing-span")]
 /// Create tracing::Span for better logging
 pub mod tracing_span;
