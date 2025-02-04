@@ -23,12 +23,15 @@ use std::{
 };
 
 use bytes::BufMut;
-use tenderdash_proto::{prost::Message, types::CanonicalVote};
 
 use crate::{
-    proto::types::{
-        BlockId, CanonicalBlockId, CanonicalVoteExtension, Commit, SignedMsgType, StateId, Vote,
-        VoteExtension, VoteExtensionType,
+    merkle::merkle_hash,
+    proto::{
+        prost::Message,
+        types::{
+            BlockId, CanonicalBlockId, CanonicalVote, CanonicalVoteExtension, Commit,
+            SignedMsgType, StateId, ValidatorSet, Vote, VoteExtension, VoteExtensionType,
+        },
     },
     Error,
 };
@@ -420,6 +423,55 @@ impl SignBytes for VoteExtension {
     }
 }
 
+impl Hashable for ValidatorSet {
+    /// Calculate hash of validator set.
+    ///
+    /// Calculates hash of validator set that is used in block header
+    /// [Header.validators_hash](crate::proto::types::Header::validators_hash)
+    /// and
+    /// [Header.next_validators_hash](crate::proto::types::Header::next_validators_hash) fields.
+    ///
+    /// ## Tenderdash implementation
+    ///
+    /// Original Tenderdash implementation:
+    /// ```go
+    /// bzs := make([][]byte, 2)
+    /// bzs[0] = vals.ThresholdPublicKey.Bytes()
+    /// bzs[1] = vals.QuorumHash
+    /// return merkle.HashFromByteSlices(bzs)
+    /// ```
+    ///
+    /// ## Arguments
+    ///
+    /// All arguments are ignored.
+    ///
+    /// ## Returns
+    ///
+    /// Returns hash of validator set.
+    fn calculate_msg_hash(
+        &self,
+        _chain_id: &str,
+        _height: i64,
+        _round: i32,
+    ) -> Result<Vec<u8>, Error> {
+        use tenderdash_proto::crypto::public_key::Sum::*;
+        let threshold_public_key_enum = self
+            .threshold_public_key
+            .as_ref()
+            .and_then(|key| key.sum.as_ref())
+            .ok_or(Error::Canonical("missing threshold public key".to_string()))?;
+
+        let threshold_public_key = match &threshold_public_key_enum {
+            Bls12381(pk) => pk,
+            Ed25519(pk) => pk,
+            Secp256k1(pk) => pk,
+        };
+
+        let result = merkle_hash(&[threshold_public_key, &self.quorum_hash]);
+        Ok(result.to_vec())
+    }
+}
+
 #[cfg(test)]
 pub mod tests {
     use std::{string::ToString, vec::Vec};
@@ -429,7 +481,7 @@ pub mod tests {
         proto::types::{
             Commit, PartSetHeader, SignedMsgType, Vote, VoteExtension, VoteExtensionType,
         },
-        signatures::Signable,
+        signatures::{Hashable, Signable},
     };
 
     #[test]
@@ -598,5 +650,36 @@ pub mod tests {
             .expect("sign digest failed");
 
         assert_eq!(sign_hash, expected_sign_hash);
+    }
+
+    #[test]
+    fn test_validator_set_hash() {
+        use crate::proto::crypto::{public_key::Sum::Bls12381, PublicKey};
+
+        const QUORUM_HASH_HEX: &str =
+            "703ee5bfc78765cc9e151d8dd84e30e196ababa83ac6cbdee31a88a46bba81b9";
+        const THRESHOLD_PUB_KEY_HEX: &str =
+            "830e45e45e6414d9d615473cc2814e6b171c508f9c77e8b16924b74594f61c9956a6fa16335e98467eac8d8bdb76d187";
+        const VALIDATORS_HASH_HEX: &str =
+            "81742F95E99EAE96ABC727FE792CECB4996205DE6BFC88AFEE1F60B96BC648B2";
+
+        let pubkey_vec = hex::decode(THRESHOLD_PUB_KEY_HEX).unwrap();
+        let quorum_hash = hex::decode(QUORUM_HASH_HEX).unwrap();
+        let expected_validators_hash = hex::decode(VALIDATORS_HASH_HEX).unwrap();
+
+        let threshold_public_key = PublicKey {
+            sum: Some(Bls12381(pubkey_vec)),
+        };
+
+        let vs = crate::proto::types::ValidatorSet {
+            threshold_public_key: Some(threshold_public_key),
+            quorum_hash,
+            ..Default::default()
+        };
+
+        // chain_id, height and round are unused
+        let actual = vs.calculate_msg_hash("", 0, 0).unwrap();
+
+        assert_eq!(expected_validators_hash, actual,);
     }
 }
