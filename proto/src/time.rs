@@ -1,9 +1,12 @@
 //! Time conversion traits and functions
 
+// Most likely we build nostd
+#[cfg(not(any(feature = "server", feature = "client")))]
+use crate::format;
 use crate::{google::protobuf::Timestamp, Error};
 pub trait ToMillis {
     /// Convert protobuf timestamp into milliseconds since epoch
-
+    ///
     /// Note there is a resolution difference, as timestamp uses nanoseconds
     ///
     /// # Arguments
