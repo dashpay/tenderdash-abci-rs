@@ -16,30 +16,38 @@ rust-version.workspace = true
 version.workspace = true
 
 [features]
-default = [
-    "server",
-    "docker-tests",
-    "crypto",
-    "tcp",
-    "unix",
-    "grpc",
-    "tracing-span",
-]
+# By default, include the server feature together with both tcp and unix transports.
+default = ["server", "docker-tests", "crypto", "tcp", "unix", "tracing-span"]
 # docker-tests includes integration tests that require docker to be available
 docker-tests = ["server"]
+# Enable server support; this is most likely what you want (plus `tcp` and/or `unix`)
 server = [
     "tracing-subscriber/fmt",
+    "tenderdash-proto/server",
     "dep:tokio",
     "dep:tokio-util",
     "dep:futures",
+    "std",
 ]
-# std is deprecated, use "grpc" instead
-std = ["grpc"]
-grpc = ["tenderdash-proto/grpc"]
+# DEPRECATED; use `server` instead
+grpc = ["server"]
+
+# Disable no_std support
+std = ["tenderdash-proto/std"]
+
+# Include crypto features, like signature verification
 crypto = ["dep:lhash"]
+
+# Include server TCP support
 tcp = ["server"]
+
+# Include server unix socket support
 unix = ["server"]
+
+# Include `tracing` crate spans
 tracing-span = ["dep:uuid"]
+
+# Include `serde` support
 serde = ["tenderdash-proto/serde", "dep:serde_json"]
 
 [[example]]
