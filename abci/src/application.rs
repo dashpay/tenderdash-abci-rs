@@ -106,9 +106,17 @@ pub trait Application {
     /// Finalizes the snapshot after all chunks have been applied.
     ///
     /// This method is called by Tenderdash after all snapshot chunks have been
-    /// successfully applied via `apply_snapshot_chunk`. It gives the application
-    /// an opportunity to perform any final processing or validation of the complete
-    /// snapshot before it is considered fully restored.
+    /// successfully applied via `apply_snapshot_chunk`. It gives the
+    /// application an opportunity to perform any final processing or
+    /// validation of the complete snapshot before it is considered fully
+    /// restored.
+    ///
+    /// Default implementation returns an empty response, meaning that the
+    /// snapshot is considered finalized.
+    ///
+    /// If finalize_snapshot fails, the application should return an error
+    /// response with a message describing the failure, as this can mean
+    /// inconsistent state between nodes.
     fn finalize_snapshot(
         &self,
         _request: abci::RequestFinalizeSnapshot,
@@ -437,7 +445,17 @@ fn match_versions(tenderdash_version: &str, rs_tenderdash_abci_version: &str) ->
 
 #[cfg(test)]
 mod tests {
-    use super::match_versions;
+    use std::{
+        collections::VecDeque,
+        sync::atomic::{AtomicIsize, AtomicU8, Ordering},
+    };
+
+    use tenderdash_proto::abci::{
+        response_apply_snapshot_chunk, ResponseApplySnapshotChunk, ResponseListSnapshots,
+        ResponseLoadSnapshotChunk, ResponseOfferSnapshot, Snapshot,
+    };
+
+    use super::{match_versions, Application};
 
     fn setup_logs() {
         tracing_subscriber::fmt()
@@ -506,5 +524,222 @@ mod tests {
         test_dev_td_newer: ("0.1.2-dev.1", "0.1.0", false),
         test_dev_equal: ("0.1.0-dev.1","0.1.0-dev.1",true),
         test_dev_our_newer_dev: ("0.1.0-dev.1", "0.1.0-dev.2",false),
+    }
+
+    // SNAPSHOTS
+    #[derive(Copy, Clone)]
+    enum SnapshotState {
+        Initial = 0,
+        SnapshotAccepted,
+        SnapshotApplied,
+        SnapshotFinalized,
+    }
+
+    const SNAPSHOT_HEIGHT: u64 = 10;
+    const SNAPSHOT_HASH: [u8; 4] = [3, 5, 7, 9];
+
+    struct SnapshotSrcApp {}
+    impl Application for SnapshotSrcApp {
+        fn list_snapshots(
+            &self,
+            _request: tenderdash_proto::abci::RequestListSnapshots,
+        ) -> Result<
+            tenderdash_proto::abci::ResponseListSnapshots,
+            tenderdash_proto::abci::ResponseException,
+        > {
+            let snapshot = Snapshot {
+                height: SNAPSHOT_HEIGHT,
+                hash: SNAPSHOT_HASH.to_vec(),
+                ..Default::default()
+            };
+            Ok(ResponseListSnapshots {
+                snapshots: vec![snapshot],
+            })
+        }
+        /// load snapshot chunk will just repeat the chunk id 4 times
+        fn load_snapshot_chunk(
+            &self,
+            request: tenderdash_proto::abci::RequestLoadSnapshotChunk,
+        ) -> Result<
+            tenderdash_proto::abci::ResponseLoadSnapshotChunk,
+            tenderdash_proto::abci::ResponseException,
+        > {
+            assert_eq!(request.height, SNAPSHOT_HEIGHT);
+
+            let chunk = request.chunk_id.repeat(4);
+
+            Ok(ResponseLoadSnapshotChunk { chunk })
+        }
+    }
+
+    struct SnapshotDstApp {
+        state: AtomicIsize,
+        next_chunk: AtomicU8,
+    }
+    impl SnapshotDstApp {
+        fn new() -> Self {
+            Self {
+                state: AtomicIsize::new(SnapshotState::Initial as isize),
+                next_chunk: AtomicU8::new(0),
+            }
+        }
+
+        fn state_eq(&self, expected: SnapshotState) -> bool {
+            self.state.load(Ordering::Relaxed) == expected as isize
+        }
+
+        fn set_state(&self, state: SnapshotState) {
+            self.state.store(state as isize, Ordering::Relaxed);
+        }
+    }
+    impl Application for SnapshotDstApp {
+        fn offer_snapshot(
+            &self,
+            request: tenderdash_proto::abci::RequestOfferSnapshot,
+        ) -> Result<
+            tenderdash_proto::abci::ResponseOfferSnapshot,
+            tenderdash_proto::abci::ResponseException,
+        > {
+            assert!(self.state_eq(SnapshotState::Initial));
+            assert_eq!(
+                request
+                    .snapshot
+                    .as_ref()
+                    .expect("snapshot not provided")
+                    .height,
+                SNAPSHOT_HEIGHT,
+            );
+
+            self.set_state(SnapshotState::SnapshotAccepted);
+
+            Ok(ResponseOfferSnapshot {
+                result: tenderdash_proto::abci::response_offer_snapshot::Result::Accept as i32,
+            })
+        }
+
+        fn apply_snapshot_chunk(
+            &self,
+            request: tenderdash_proto::abci::RequestApplySnapshotChunk,
+        ) -> Result<
+            tenderdash_proto::abci::ResponseApplySnapshotChunk,
+            tenderdash_proto::abci::ResponseException,
+        > {
+            assert!(self.state_eq(SnapshotState::SnapshotAccepted));
+            let chunk_id = self.next_chunk.fetch_add(1, Ordering::Relaxed);
+            // if we start, we should get request for SNAPSHOT_HASH
+            if chunk_id == 0 {
+                assert!(request.chunk_id.eq(&SNAPSHOT_HASH));
+            } else {
+                // otherwise check if chunk is correct
+                assert!(request.chunk.eq(&[chunk_id].repeat(4)));
+            }
+
+            // on chunk 10, we finish
+            if chunk_id == 10 {
+                self.set_state(SnapshotState::SnapshotApplied);
+                return Ok(ResponseApplySnapshotChunk {
+                    result: tenderdash_proto::abci::response_apply_snapshot_chunk::Result::CompleteSnapshot
+                        as i32,
+                    ..Default::default()
+                });
+            }
+
+            // every second request, we ask for two next chunks
+            let next_chunks = if chunk_id % 2 == 0 {
+                vec![vec![chunk_id + 1], vec![chunk_id + 2]]
+            } else {
+                Default::default()
+            };
+
+            Ok(ResponseApplySnapshotChunk {
+                result: tenderdash_proto::abci::response_apply_snapshot_chunk::Result::Accept
+                    as i32,
+                next_chunks,
+                ..Default::default()
+            })
+        }
+
+        fn finalize_snapshot(
+            &self,
+            _request: tenderdash_proto::abci::RequestFinalizeSnapshot,
+        ) -> Result<
+            tenderdash_proto::abci::ResponseFinalizeSnapshot,
+            tenderdash_proto::abci::ResponseException,
+        > {
+            assert!(self.state_eq(SnapshotState::SnapshotApplied));
+            assert!(self.next_chunk.load(Ordering::Relaxed) == 11);
+
+            self.set_state(SnapshotState::SnapshotFinalized);
+
+            Ok(tenderdash_proto::abci::ResponseFinalizeSnapshot {})
+        }
+    }
+
+    #[test]
+    fn snapshot_restore() {
+        let src = SnapshotSrcApp {};
+        let dst = SnapshotDstApp::new();
+
+        // Snapshot proposal - Tenderdash gets list of snapshots from the src
+        // application and offers one to dst app
+        let snapshots = src
+            .list_snapshots(Default::default())
+            .expect("list_snapshots failed");
+        let snapshot = snapshots.snapshots.first().expect("no snapshots");
+
+        let offer_resp = dst
+            .offer_snapshot(tenderdash_proto::abci::RequestOfferSnapshot {
+                app_hash: snapshot.hash.clone(),
+                snapshot: Some(snapshot.clone()),
+            })
+            .expect("offer_snapshot failed");
+
+        assert!(
+            offer_resp.result
+                == tenderdash_proto::abci::response_offer_snapshot::Result::Accept as i32
+        );
+
+        // As snapshot is accepted, Tenderdash requests chunks from the src,
+        // starting with the snapshot hash
+        let snapshot_hash = snapshot.hash.clone();
+        let mut chunks: VecDeque<Vec<u8>> = VecDeque::new();
+        chunks.push_back(snapshot_hash);
+
+        while let Some(chunk_id) = chunks.pop_front() {
+            let chunk = src
+                .load_snapshot_chunk(tenderdash_proto::abci::RequestLoadSnapshotChunk {
+                    height: snapshot.height,
+                    chunk_id: chunk_id.clone(),
+                    version: 0,
+                })
+                .expect("load_snapshot_chunk failed");
+
+            let applied = dst
+                .apply_snapshot_chunk(tenderdash_proto::abci::RequestApplySnapshotChunk {
+                    chunk_id,
+                    chunk: chunk.chunk.clone(),
+                    sender: "".to_string(),
+                })
+                .expect("apply_snapshot_chunk failed");
+
+            chunks.extend(applied.next_chunks);
+            if applied.result == response_apply_snapshot_chunk::Result::CompleteSnapshot as i32 {
+                assert_eq!(chunks.len(), 0);
+            } else {
+                assert_eq!(
+                    applied.result,
+                    response_apply_snapshot_chunk::Result::Accept as i32
+                );
+            }
+        }
+
+        // We are done - finalizing the snapshot
+        let _ = dst
+            .finalize_snapshot(tenderdash_proto::abci::RequestFinalizeSnapshot {
+                ..Default::default()
+            })
+            .expect("finalize_snapshot failed");
+
+        assert!(dst.state_eq(SnapshotState::SnapshotFinalized));
     }
 }
