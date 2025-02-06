@@ -103,6 +103,12 @@ pub trait Application {
         Ok(Default::default())
     }
 
+    /// Finalizes the snapshot after all chunks have been applied.
+    ///
+    /// This method is called by Tenderdash after all snapshot chunks have been
+    /// successfully applied via `apply_snapshot_chunk`. It gives the application
+    /// an opportunity to perform any final processing or validation of the complete
+    /// snapshot before it is considered fully restored.
     fn finalize_snapshot(
         &self,
         _request: abci::RequestFinalizeSnapshot,
