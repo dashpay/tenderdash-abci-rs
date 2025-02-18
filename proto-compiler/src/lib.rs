@@ -124,14 +124,29 @@ pub fn proto_compile(mode: GenerationMode) {
     println!("[info] => Creating structs.");
 
     match mode {
-        GenerationMode::Grpc => {
+        GenerationMode::GrpcServer => {
             #[cfg(feature = "grpc")]
             tonic_build::configure()
+                .build_client(true)
+                .build_server(true)
+                .build_transport(true)
                 .generate_default_stubs(true)
                 .compile_protos_with_config(pb, &protos, &proto_includes_paths)
                 .unwrap();
             #[cfg(not(feature = "grpc"))]
-            panic!("grpc feature is required to compile {}", mode.to_string());
+            panic!("grpc feature is required to compile {}", mode);
+        },
+        GenerationMode::GrpcClient => {
+            #[cfg(feature = "grpc")]
+            tonic_build::configure()
+                .build_client(true)
+                .build_server(false)
+                .build_transport(false)
+                .generate_default_stubs(true)
+                .compile_protos_with_config(pb, &protos, &proto_includes_paths)
+                .unwrap();
+            #[cfg(not(feature = "grpc"))]
+            panic!("grpc feature is required to compile {}", mode);
         },
         GenerationMode::NoStd => {
             pb.compile_protos(&protos, &proto_includes_paths).unwrap();

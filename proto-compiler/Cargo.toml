@@ -26,9 +26,4 @@ tonic-build = { version = "0.12.3", optional = true }
 [features]
 default = []
 # Enable gRPC support; needed by server and client features.
-# Conflicts with no_std
 grpc = ["dep:tonic-build"]
-# Build the gRPC server. Requires tenderdash-proto/grpc feature.
-server = ["grpc"]
-# Build the gRPC client. Requires tenderdash-proto/grpc feature.
-client = ["grpc"]

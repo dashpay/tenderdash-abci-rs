@@ -26,7 +26,10 @@ pub use tenderdash_proto as proto;
 use tenderdash_proto::prost::{DecodeError, EncodeError};
 
 #[cfg(feature = "crypto")]
+mod merkle;
+#[cfg(feature = "crypto")]
 pub mod signatures;
+
 #[cfg(feature = "tracing-span")]
 /// Create tracing::Span for better logging
 pub mod tracing_span;
@@ -39,13 +42,27 @@ pub enum Error {
     #[error("connection error")]
     Connection(#[from] io::Error),
     #[error("cannot decode protobuf message")]
-    Decode(#[from] DecodeError),
+    Decode(DecodeError),
     #[error("cannot encode protobuf message")]
-    Encode(#[from] EncodeError),
+    Encode(EncodeError),
     #[error("cannot create canonical message: {0}")]
     Canonical(String),
     #[error("server terminated")]
     Cancelled(),
     #[error("async runtime error")]
     Async(String),
+}
+
+// manually implemented due to no_std compatibility
+impl From<EncodeError> for Error {
+    fn from(error: EncodeError) -> Error {
+        Error::Encode(error)
+    }
+}
+
+// manually implemented due to no_std compatibility
+impl From<DecodeError> for Error {
+    fn from(error: DecodeError) -> Error {
+        Error::Decode(error)
+    }
 }

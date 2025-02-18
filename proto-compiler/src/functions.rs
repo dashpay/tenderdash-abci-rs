@@ -311,7 +311,7 @@ pub mod meta {{
         tenderdash_commitish(),
         abci_ver,
         td_ver,
-        mode.to_string(),
+        mode,
     );
 
     let mut file =
