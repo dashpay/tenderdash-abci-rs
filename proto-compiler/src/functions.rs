@@ -101,8 +101,8 @@ fn download(url: &str, archive_file: &Path) -> Result<(), String> {
     let rb = ureq::get(url)
         .call()
         .map_err(|e| format!("cannot download archive from: {}: {:?}", url, e))?;
-
-    let mut reader = rb.into_reader();
+    let mut body = rb.into_body();
+    let mut reader = body.as_reader();
     std::io::copy(&mut reader, &mut file).map_err(|e| {
         format!(
             "cannot save downloaded data to: {:?}: {:?}",
