@@ -63,7 +63,7 @@ tracing-subscriber = { version = "0.3.18", optional = true, default-features = f
     "ansi",
     "env-filter",
 ] }
-serde_json = { version = "1.0.128", optional = true }
+serde_json = { version = "1.0", optional = true }
 thiserror = { version = "2.0.3" }
 url = { version = "2.5.0" }
 semver = { version = "1.0.22" }
